@@ -7,8 +7,8 @@ print256(unsigned int a)
 	int i;
 	int first = 1;
 
-	if (a > 1) {
-		for (i = 7; i >= 0; --i) {
+	if (a) {
+		for (i = CHAR_BIT - 1; i >= 0; --i) {
 			if (a & (1 << i)) {
 				if (first) 
 					first = 0;
@@ -107,10 +107,40 @@ mul(unsigned int a, unsigned int b)
 unsigned int
 euclid(unsigned int a, unsigned int b, unsigned int *u, unsigned int *v)
 {
-	if (a == 0) {
-		return b;
-	} else {
+	unsigned int r_prev = a;
+	unsigned int r      = b;
+	unsigned int s_prev = 0;
+	unsigned int s      = 1;
+	unsigned int t_prev = 0;
+	unsigned int t      = 1;
+	unsigned int tmp;
+	unsigned int q;
+
+	while (r) {
+		tmp = r;
+		q = div_euclidean(r_prev, r, &r);
+		r_prev = tmp;
+
+		tmp = t;
+		t = add256(t_prev, mul(q, t));
+		t_prev = tmp;
+
+		tmp = s;
+		s = add256(t_prev, mul(q, t));
+		s_prev = tmp;
+		
+	}
+	*u = t;
+	*v = s;	
+	return q;
 }
+
+unsigned int mul256(unsigned int a, unsigned int b); /* a*b mod p */
+unsigned int div256(unsigned int a, unsigned int b)
+{
+	return mul256(a, inv256(b));
+}
+unsigned int inv256();
 
 int
 main()
@@ -119,8 +149,13 @@ main()
 	unsigned int n;
 	unsigned int d;
 	unsigned int r;
+
+	unsigned int q;
+	unsigned int u;
+	unsigned int v;
+
 	print_poly(oct);
-	printf("\n");
+	printf("\n\n");
 	
 	n = 0b01010111;
 	d = 0b00001011;
@@ -132,7 +167,7 @@ main()
 	print_poly(d);
 	printf(" + ");
 	print_poly(r);
-	printf("\n");
+	printf("\n\n");
 
 	print_poly(oct);
 	printf(" * ");
@@ -140,12 +175,24 @@ main()
 	printf(" = ");
 	oct = mul(oct, d);
 	print_poly(oct);
+	printf("\n\n");
+	
+	printf("gcd(");
+	print_poly(oct);
+	printf(", ");
+	print_poly(d);
+	printf(") = ");
+	q = euclid(oct, d, &u, &v);
+	print_poly(q);
 	printf("\n");
+	printf("u = ");
+	print_poly(u);
+	printf(", v = ");
+	print_poly(v);
+	printf("\n\n");
+	
 
 	return 0;
 }	
-unsigned int mul256(); /* a*b mod p */
-unsigned int div256(); /* a*b mod p */
-unsigned int inv256(); /* a*b mod p */
 
 
