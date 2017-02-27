@@ -11,6 +11,16 @@ get_highest_exponent(unsigned int a)
 		a = a >> 1;
 	return i;
 }
+
+void
+swap(unsigned int *a, unsigned int *b)
+{
+	if (a != b) {
+		*a ^= *b;
+		*b ^= *a;
+		*a ^= *b;
+	}
+}
 	
 void
 print256(unsigned int a)
@@ -27,13 +37,13 @@ print256(unsigned int a)
 					printf("+");	
 				
 				if (i)
-					printf("x^%d", i);
+					printf("x^%u", i);
 				else
-					printf("%d", 1);
+					printf("%u", 1);
 			}
 		}
 	} else {
-		printf("%d", a);
+		printf("%u", a);
 	}
 }
 
@@ -55,9 +65,9 @@ print_poly(unsigned int a)
 					printf("+");	
 					
 				if (i)
-					printf("x^%d", i);
+					printf("x^%u", i);
 				else
-					printf("%d", 1);
+					printf("%u", 1);
 			}
 		}
 	} else {
@@ -111,21 +121,17 @@ euclid(unsigned int a, unsigned int b, unsigned int *u, unsigned int *v)
 	unsigned int s      = 0;
 	unsigned int t_prev = 0;
 	unsigned int t      = 1;
-	unsigned int tmp;
 	unsigned int q;
 
 	while (r) {
-		tmp = r;
-		q = div_euclidean(r_prev, r, &r);
-		r_prev = tmp;
+		q = div_euclidean(r_prev, r, &r_prev);
+		swap(&r, &r_prev);
 
-		tmp = s;
-		s = add256(s_prev, mul(q, s));
-		s_prev = tmp;
+		s_prev = add256(s_prev, mul(q, s));
+		swap(&s, &s_prev);
 
-		tmp = t;
-		t = add256(t_prev, mul(q, t));
-		t_prev = tmp;
+		t_prev = add256(t_prev, mul(q, t));
+		swap(&t, &t_prev);
 	}
 	*u = s_prev;
 	*v = t_prev;
