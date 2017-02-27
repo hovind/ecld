@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include <limits.h> /* CHAR_BIT */
 
+static unsigned int polynomial256 = 0x11b;
+
+unsigned int
+get_highest_exponent(unsigned int a)
+{
+	unsigned int i;
+	for (i = 0; a; ++i)
+		a = a >> 1;
+	return i;
+}
+	
 void
 print256(unsigned int a)
 {
@@ -64,32 +75,19 @@ unsigned int
 div_euclidean(unsigned int a, unsigned int b, unsigned int *r)
 {
 	int factor;
-	unsigned int tmp;
-
 	int i;
 	int j;
 	unsigned int ret = 0;
 	
-	j = 0;
-	tmp = b;
-	while (tmp = tmp >> 1)
-		++j;
+	j = get_highest_exponent(b);
 	
-	for (;;) {
-		i = 0;
-		tmp = a;
-		while (tmp = tmp >> 1)
-			++i;
-		
-		if (i < j) {
-			*r = a;
-			return ret;
-		} else {	
-			factor = i - j;
-			ret |= 1 << factor;
-			a = add256(a, b << factor);
-		}
+	while ((i = get_highest_exponent(a)) >= j) {
+		factor = i - j;
+		ret |= 1 << factor;
+		a = add256(a, b << factor);
 	}
+	*r = a;
+	return ret;
 }
 
 unsigned int
@@ -109,8 +107,8 @@ euclid(unsigned int a, unsigned int b, unsigned int *u, unsigned int *v)
 {
 	unsigned int r_prev = a;
 	unsigned int r      = b;
-	unsigned int s_prev = 0;
-	unsigned int s      = 1;
+	unsigned int s_prev = 1;
+	unsigned int s      = 0;
 	unsigned int t_prev = 0;
 	unsigned int t      = 1;
 	unsigned int tmp;
@@ -121,47 +119,59 @@ euclid(unsigned int a, unsigned int b, unsigned int *u, unsigned int *v)
 		q = div_euclidean(r_prev, r, &r);
 		r_prev = tmp;
 
+		tmp = s;
+		s = add256(s_prev, mul(q, s));
+		s_prev = tmp;
+
 		tmp = t;
 		t = add256(t_prev, mul(q, t));
 		t_prev = tmp;
-
-		tmp = s;
-		s = add256(t_prev, mul(q, t));
-		s_prev = tmp;
-		
 	}
-	*u = t;
-	*v = s;	
+	*u = s_prev;
+	*v = t_prev;
 	return q;
 }
 
-unsigned int mul256(unsigned int a, unsigned int b); /* a*b mod p */
-unsigned int div256(unsigned int a, unsigned int b)
+unsigned int
+mul256(unsigned int a, unsigned int b)
+{
+	unsigned int r;
+	div_euclidean(mul(a, b), polynomial256, &r);
+	return r;
+}
+
+unsigned int
+inv256(unsigned int a)
+{
+	unsigned int u;
+	unsigned int v;
+	euclid(polynomial256, a, &u, &v);
+	return v;
+}
+
+unsigned int
+div256(unsigned int a, unsigned int b)
 {
 	return mul256(a, inv256(b));
 }
-unsigned int inv256();
 
 int
 main()
 {
-	unsigned int oct = 93;
-	unsigned int n;
+	unsigned int oct;
 	unsigned int d;
-	unsigned int r;
-
 	unsigned int q;
 	unsigned int u;
 	unsigned int v;
 
-	print_poly(oct);
+	/*print_poly(oct);
 	printf("\n\n");
 	
 	n = 0b01010111;
 	d = 0b00001011;
-	print_poly(n);
+	print_poly(polynomial256);
 	printf(" = ");
-	oct = div_euclidean(n, d, &r);
+	oct = div_euclidean(polynomial256, d, &r);
 	print_poly(oct);
 	printf(" * ");
 	print_poly(d);
@@ -175,24 +185,36 @@ main()
 	printf(" = ");
 	oct = mul(oct, d);
 	print_poly(oct);
-	printf("\n\n");
+	printf("\n\n"); */
 	
+	d = 0x53;
 	printf("gcd(");
-	print_poly(oct);
+	print_poly(polynomial256);
 	printf(", ");
 	print_poly(d);
 	printf(") = ");
-	q = euclid(oct, d, &u, &v);
+	q = euclid(polynomial256, d, &u, &v);
 	print_poly(q);
 	printf("\n");
-	printf("u = ");
 	print_poly(u);
-	printf(", v = ");
+	printf(" * ");
+	print_poly(polynomial256);
+	printf(" + ");
 	print_poly(v);
+	printf(" * ");
+	print_poly(d);
+	printf(" = ");
+	print_poly(q);
+	
 	printf("\n\n");
 	
-
+	printf("inv(");
+	print_poly(d);
+	printf(") = ");
+	oct = inv256(d);
+	print_poly(oct);
+	printf("\n\n");
+	
 	return 0;
 }	
-
 
