@@ -4,7 +4,7 @@
 static unsigned int polynomial256 = 0x11b;
 
 unsigned int
-get_highest_exponent(unsigned int a)
+ord(unsigned int a)
 {
 	unsigned int i;
 	for (i = 0; a; ++i)
@@ -89,9 +89,9 @@ div_euclidean(unsigned int a, unsigned int b, unsigned int *r)
 	int j;
 	unsigned int ret = 0;
 	
-	j = get_highest_exponent(b);
+	j = ord(b);
 	
-	while ((i = get_highest_exponent(a)) >= j) {
+	while ((i = ord(a)) >= j) {
 		factor = i - j;
 		ret |= 1 << factor;
 		a = add256(a, b << factor);
@@ -106,7 +106,7 @@ mul(unsigned int a, unsigned int b)
 	int i;
 	unsigned int ret = 0;
 	for (i = 0; a; ++i, a = a >> 1) {
-		if (a & 0b1)
+		if (a & 0x1)
 			ret = add256(ret, b << i);
 	}
 	return ret;	
