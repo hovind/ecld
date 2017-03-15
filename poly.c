@@ -135,7 +135,7 @@ euclid(unsigned int a, unsigned int b, unsigned int *u, unsigned int *v)
 	}
 	*u = s_prev;
 	*v = t_prev;
-	return q;
+	return r_prev;
 }
 
 unsigned int
@@ -161,7 +161,7 @@ div256(unsigned int a, unsigned int b)
 	return mul256(a, inv256(b));
 }
 
-int
+/* int
 main()
 {
 	unsigned int oct;
@@ -169,29 +169,6 @@ main()
 	unsigned int q;
 	unsigned int u;
 	unsigned int v;
-
-	/*print_poly(oct);
-	printf("\n\n");
-	
-	n = 0b01010111;
-	d = 0b00001011;
-	print_poly(polynomial256);
-	printf(" = ");
-	oct = div_euclidean(polynomial256, d, &r);
-	print_poly(oct);
-	printf(" * ");
-	print_poly(d);
-	printf(" + ");
-	print_poly(r);
-	printf("\n\n");
-
-	print_poly(oct);
-	printf(" * ");
-	print_poly(d);
-	printf(" = ");
-	oct = mul(oct, d);
-	print_poly(oct);
-	printf("\n\n"); */
 	
 	d = 0x53;
 	printf("gcd(");
@@ -222,5 +199,4 @@ main()
 	printf("\n\n");
 	
 	return 0;
-}	
-
+} */

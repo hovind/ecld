@@ -12,4 +12,8 @@ unsigned int mul256(unsigned int a, unsigned int b); /* a * b mod p */
 unsigned int div256(unsigned int a, unsigned int b); /* a / b mod p */
 unsigned int inv256(unsigned int a); /* a^-1 mod p */
 
+unsigned int div_Euclide(unsigned int a, unsigned int b, unsigned int *r)
+{ return div_euclidean(a, b, r); }
+unsigned int Euclide_Etendu(unsigned int a, unsigned int b, unsigned int *u, unsigned int *v)
+{ return euclid(a, b, u, v); }
 
